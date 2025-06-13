@@ -40,7 +40,7 @@ Target columns:
 ---
 
 ## 📂 Project Structure
--**HYDROWATCH-A WATER QUALITY MONITORING NETWORK FOR DRINKING AND IRRIGATION** /
+-HYDROWATCH-A WATER QUALITY MONITORING NETWORK FOR DRINKING AND IRRIGATION /
 -├── app.py # Main Gradio ML application
 -├── DataSet.csv # Dataset file (used in training)
 -├── requirements.txt # List of required Python packages
