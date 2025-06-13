@@ -54,16 +54,15 @@ Target columns:
 🧪 How to Run
 >1.Clone the repository:
 
-git clone https://github.com/yourusername/water-quality-predictor.git
-cd water-quality-predictor
-**2.Install dependencies:
-
-pip install -r requirements.txt
-**3.Make sure the dataset is present at the specified path.
-**4.Run the application:
+>https://github.com/AdityaSripalle/HYDROWATCH-A-WATER-QUALITY-MONITORING-NETWORK-FOR-DRINKING-AND-IRRIGATION.git
+>cd water-quality-predictor
+>2.Install dependencies:
+>pip install -r requirements.txt
+>3.Make sure the dataset is present at the specified path.
+>4.Run the application:
 python app.py
-**5.The app will launch in your browser.
-
+>5.The app will launch in your browser.
+---
 
 Copyright (c) 2025 Aditya Sripalle
 
