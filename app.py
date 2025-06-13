@@ -26,7 +26,7 @@ global_target_type = "classification"  # Default to classification
 # Load Dataset from Local Path
 def load_data(target_type="classification"):
     try:
-        df = pd.read_csv(r"C:\Users\adity\OneDrive\Desktop\mini\DataSet.csv")  # Load dataset directly
+        df = pd.read_csv(r"C:\Users\adity\OneDrive\Documents\mini\DataSet.csv")  # Load dataset directly
     except FileNotFoundError:
         return None, None, None, None, " Error: 'Dataset.csv' not found!"
 
@@ -241,5 +241,5 @@ with gr.Blocks() as demo:
             gr.Image(value=accuracy_comparison_img)
 
 # Run the App
-if _name_ == "_main_":
+if __name__ == "__main__":
     demo.launch()
