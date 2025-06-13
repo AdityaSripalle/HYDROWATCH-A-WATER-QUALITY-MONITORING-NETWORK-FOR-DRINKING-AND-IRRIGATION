@@ -52,7 +52,7 @@ Target columns:
 -├── README.md # Project documentation (you’re reading it)
 ---
 🧪 How to Run
-**1.Clone the repository:
+>1.Clone the repository:
 
 git clone https://github.com/yourusername/water-quality-predictor.git
 cd water-quality-predictor
