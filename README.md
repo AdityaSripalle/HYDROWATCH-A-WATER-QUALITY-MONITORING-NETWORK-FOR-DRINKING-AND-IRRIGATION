@@ -43,7 +43,7 @@ Target columns:
 ---
 -HYDROWATCH-A WATER QUALITY MONITORING NETWORK FOR DRINKING AND IRRIGATION /
 ---
--├── app.py # Main Gradio ML application
+-**├── app.py # Main Gradio ML application**
 ---
 -├── DataSet.csv # Dataset file (used in training)
 ---
