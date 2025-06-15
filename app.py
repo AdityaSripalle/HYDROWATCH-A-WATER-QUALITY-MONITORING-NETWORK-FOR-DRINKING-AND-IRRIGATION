@@ -23,19 +23,15 @@ scaler = None
 label_encoder = None
 global_target_type = "classification"  # Default to classification
 
-# Load Dataset from Local Path
+# Load Dataset
 def load_data(target_type="classification"):
     try:
-        df = pd.read_csv(r"C:\Users\adity\OneDrive\Documents\mini\DataSet.csv")  # Load dataset directly
+        df = pd.read_csv(r"C:\Users\adity\OneDrive\Documents\mini\DataSet.csv")
     except FileNotFoundError:
         return None, None, None, None, " Error: 'Dataset.csv' not found!"
 
     features = ['pH', 'EC', 'CO3', 'HCO3', 'Cl', 'SO4', 'NO3', 'TH', 'Ca', 'Mg', 'Na', 'K', 'F', 'TDS']
-
-    if target_type == "classification":
-        target = 'Water Quality Classification'
-    else:
-        target = 'WQI'
+    target = 'Water Quality Classification' if target_type == "classification" else 'WQI'
 
     if target not in df.columns:
         return None, None, None, None, " Error: Target column missing!"
@@ -53,7 +49,7 @@ def load_data(target_type="classification"):
 # Train Models
 def train_models(target_type="classification"):
     global global_target_type
-    global_target_type = target_type  # Update the target_type variable
+    global_target_type = target_type
 
     df_cleaned, features, target, label_encoder, status = load_data(target_type)
     if df_cleaned is None:
@@ -62,10 +58,7 @@ def train_models(target_type="classification"):
     global best_model, scaler
 
     X = df_cleaned[features]
-    y = df_cleaned[target]
-
-    # Convert y to 1D for classification tasks
-    y = y.to_numpy()
+    y = df_cleaned[target].to_numpy()
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -73,7 +66,6 @@ def train_models(target_type="classification"):
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    # Select models for regression or classification
     if target_type == "classification":
         models = {
             'Random Forest': RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42),
@@ -120,15 +112,18 @@ def train_models(target_type="classification"):
             })
 
     results_df = pd.DataFrame(results)
-
-    best_model_name = results_df.loc[results_df['Training Accuracy'].idxmax(), 'Model Name'] if target_type == "classification" else results_df.loc[results_df['Testing MAE'].idxmin(), 'Model Name']
+    best_model_name = (
+        results_df.loc[results_df['Training Accuracy'].idxmax(), 'Model Name']
+        if target_type == "classification"
+        else results_df.loc[results_df['Testing MAE'].idxmin(), 'Model Name']
+    )
     best_model = models[best_model_name]
 
     return results_df, best_model_name, "🏆 Best Model Selected: " + best_model_name
 
 # Prediction Function
 def predict_water_quality(*features):
-    input_data = np.array(features).reshape(1, -1)  # Reshape to 2D array for model prediction
+    input_data = np.array(features).reshape(1, -1)
 
     if best_model is not None and scaler is not None:
         input_data_scaled = scaler.transform(input_data)
@@ -142,10 +137,10 @@ def predict_water_quality(*features):
     else:
         return "Error: Model is not trained yet. Please train the model first.", "Error: Model is not trained yet."
 
-# Visualize Model Comparison - Precision, F1, R2, MAE
+# Visualization - Comparison of Metrics
 def visualize_model_comparison(results_df):
     import matplotlib
-    matplotlib.use('Agg')  # Use Agg backend to prevent Tkinter-related issues
+    matplotlib.use('Agg')
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
 
     metrics = ['Precision', 'F1 Score', 'R2 Score', 'MAE']
@@ -163,36 +158,28 @@ def visualize_model_comparison(results_df):
     fig.savefig(buf, format='png')
     buf.seek(0)
     plt.close(fig)
-    img = Image.open(buf)
-    return img
+    return Image.open(buf)
 
-# Visualization for Training and Testing Accuracy Comparison
+# Accuracy Plot
 def visualize_accuracy_comparison(results_df):
     import matplotlib
-    matplotlib.use('Agg')  # Use Agg backend to prevent Tkinter-related issues
-
-    if 'Model Name' not in results_df.columns:
-        return "❌ Error: 'Model Name' column is missing in results_df"
-
+    matplotlib.use('Agg')
     fig, ax = plt.subplots(figsize=(10, 5))
     results_df.set_index('Model Name')[['Training Accuracy', 'Testing Accuracy']].plot(kind='bar', ax=ax, colormap='coolwarm')
-
     plt.xticks(rotation=45, ha="right")
     plt.ylabel("Accuracy")
     plt.title("Training Accuracy vs Testing Accuracy for Different Models")
     plt.tight_layout()
-
     img = BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
-    pil_img = Image.open(img)
     plt.close(fig)
-    return pil_img
+    return Image.open(img)
 
-# Gradio Interface with Three Pages (Tabs)
+# Gradio UI
 with gr.Blocks() as demo:
     with gr.Tabs():
-        # Page 1: Train, Table, Prediction
+        # Tab 1: Train and Predict
         with gr.TabItem("Train, Table, Prediction"):
             gr.Markdown("# 💧 Water Quality Prediction")
 
@@ -201,10 +188,8 @@ with gr.Blocks() as demo:
                 train_button = gr.Button("🔄 Train Model")
 
             with gr.Row():
-                output_text = gr.Textbox(label="Status", interactive=False)
-
-            with gr.Row():
                 results_df = gr.Dataframe(label="📊 Model Performance Table")
+                output_text = gr.Textbox(label="Status")
 
             train_button.click(
                 fn=lambda target_type: train_models(target_type),
@@ -212,7 +197,7 @@ with gr.Blocks() as demo:
                 outputs=[results_df, output_text]
             )
 
-            gr.Markdown("###  Predict Water Quality")
+            gr.Markdown("### 🔮 Predict Water Quality")
             input_fields = [gr.Number(label=feature, value=0.0) for feature in ['pH', 'EC', 'CO3', 'HCO3', 'Cl', 'SO4', 'NO3', 'TH', 'Ca', 'Mg', 'Na', 'K', 'F', 'TDS']]
 
             with gr.Row():
@@ -221,25 +206,35 @@ with gr.Blocks() as demo:
                 predict_class_output = gr.Textbox(label="Water Quality Classification", interactive=False)
 
             predict_button.click(
-                predict_water_quality,
+                fn=predict_water_quality,
                 inputs=input_fields,
                 outputs=[predict_output, predict_class_output]
             )
 
-        # Page 2: Model Visualization (Precision, F1, R2, MAE)
+        # Tab 2: Model Visualization
         with gr.TabItem("Model Visualization"):
             gr.Markdown("### 📊 Model Comparison")
-            train_results_df, best_model_name, status = train_models("classification")
-            images = visualize_model_comparison(train_results_df)
-            gr.Image(value=images)
 
-        # Page 3: Results - Training Accuracy vs Testing Accuracy
+            def load_visualization():
+                df, _, _ = train_models("classification")
+                return visualize_model_comparison(df)
+
+            vis_button = gr.Button("📊 Generate Model Comparison")
+            vis_output = gr.Image(label="Model Comparison")
+            vis_button.click(fn=load_visualization, inputs=[], outputs=vis_output)
+
+        # Tab 3: Accuracy Visualization
         with gr.TabItem("Results"):
-            gr.Markdown("### 📊 Training Accuracy vs Testing Accuracy Comparison")
-            train_results_df, best_model_name, status = train_models("classification")
-            accuracy_comparison_img = visualize_accuracy_comparison(train_results_df)
-            gr.Image(value=accuracy_comparison_img)
+            gr.Markdown("### 📈 Training vs Testing Accuracy")
 
-# Run the App
+            def load_accuracy():
+                df, _, _ = train_models("classification")
+                return visualize_accuracy_comparison(df)
+
+            acc_button = gr.Button("📈 Generate Accuracy Plot")
+            acc_output = gr.Image(label="Accuracy Comparison")
+            acc_button.click(fn=load_accuracy, inputs=[], outputs=acc_output)
+
+# Run app
 if __name__ == "__main__":
     demo.launch()
